@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { sortByClosedProp } from "./helpers";
 //TODO Delete after connecting to server
 import uuid from 'uuid';
 
@@ -416,7 +417,7 @@ class App extends Component {
                 "createDate": "2018-04-14T15:00:50",
                 "family": null
             }
-        ]
+        ].sort(sortByClosedProp)
     };
 
     handleStatusIconClick  = (id) => {
@@ -458,7 +459,7 @@ class App extends Component {
         };
 
         this.setState({
-            items: this.state.items.concat(newItem)
+            items: this.state.items.concat(newItem).sort(sortByClosedProp)
         });
     };
 
