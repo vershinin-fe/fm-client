@@ -427,7 +427,7 @@ class App extends Component {
             } else {
                 return item;
             }
-        });
+        }).sort(sortByClosedProp);
         this.setState(Object.assign({}, this.state, {items: newItems}));
     };
 
