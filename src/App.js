@@ -155,7 +155,8 @@ class ListItem extends Component {
     static propTypes = {
         item: PropTypes.object.isRequired,
         onStatusIconClick: PropTypes.func.isRequired,
-        onEditClick: PropTypes.func.isRequired
+        onEditClick: PropTypes.func.isRequired,
+        onTrashClick: PropTypes.func.isRequired
     };
 
     state = {
@@ -168,6 +169,10 @@ class ListItem extends Component {
 
     handleStatusIconClick = () => {
         this.props.onStatusIconClick(this.props.item.id);
+    };
+
+    handleTrashClick = () => {
+        this.props.onTrashClick(this.props.item.id);
     };
 
     render() {
@@ -183,7 +188,10 @@ class ListItem extends Component {
                     >
                         <i className='edit icon'/>
                     </span>
-                    <span className='right floated trash icon'>
+                    <span
+                        className='right floated trash icon'
+                        onClick={this.handleTrashClick}
+                    >
                         <i className='trash icon'/>
                     </span>
                 </div>
@@ -215,7 +223,8 @@ class EditableItem extends Component {
         item: PropTypes.object,
         muList: PropTypes.arrayOf(PropTypes.string).isRequired,
         onStatusIconClick: PropTypes.func.isRequired,
-        onFormSubmit: PropTypes.func.isRequired
+        onFormSubmit: PropTypes.func.isRequired,
+        onTrashClick: PropTypes.func.isRequired
     };
 
     state = {
@@ -259,6 +268,7 @@ class EditableItem extends Component {
                     item={this.props.item}
                     onStatusIconClick={this.props.onStatusIconClick}
                     onEditClick={this.handleEditClick}
+                    onTrashClick={this.props.onTrashClick}
                 />
             );
         }
@@ -428,6 +438,10 @@ class App extends Component {
         this.updateItem(item);
     };
 
+    handleTrashClick = (itemId) => {
+        this.deleteItem(itemId);
+    };
+
     createItem = (item) => {
         const newItem = {
             "@id": "",
@@ -465,6 +479,12 @@ class App extends Component {
         });
     };
 
+    deleteItem = (itemId) => {
+        this.setState({
+            items: this.state.items.filter(item => item.id !== itemId)
+        });
+    };
+
     render() {
         const editableItems = this.state.items.map((item, idx) => (
             <EditableItem
@@ -472,6 +492,7 @@ class App extends Component {
                 item={item}
                 muList={this.state.mus}
                 onStatusIconClick={this.handleStatusIconClick}
+                onTrashClick={this.handleTrashClick}
                 onFormSubmit={this.handleEditFormSubmit}
             />
         ));
