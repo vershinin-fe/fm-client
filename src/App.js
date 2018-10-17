@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { sortByClosedProp } from "./helpers";
+import { sortBy } from "./helpers";
 //TODO Delete after connecting to server
 import uuid from 'uuid';
 
@@ -332,7 +332,7 @@ class App extends Component {
             'мл',
             'шт'
         ],
-        items: [
+        items: sortBy([
             {
                 "@id": 1,
                 "id": 105,
@@ -417,7 +417,7 @@ class App extends Component {
                 "createDate": "2018-04-14T15:00:50",
                 "family": null
             }
-        ].sort(sortByClosedProp)
+        ], 'BY_STATUS')
     };
 
     handleStatusIconClick  = (id) => {
@@ -427,8 +427,8 @@ class App extends Component {
             } else {
                 return item;
             }
-        }).sort(sortByClosedProp);
-        this.setState(Object.assign({}, this.state, {items: newItems}));
+        });
+        this.setState(Object.assign({}, this.state, {items: sortBy(newItems, 'BY_STATUS')}));
     };
 
     handleCreateFormSubmit = (item) => {
@@ -459,7 +459,7 @@ class App extends Component {
         };
 
         this.setState({
-            items: this.state.items.concat(newItem).sort(sortByClosedProp)
+            items: sortBy(this.state.items.concat(newItem), 'BY_STATUS')
         });
     };
 
