@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { sortBy } from "./helpers";
+import { sortBy, SortOrders } from "./helpers";
 //TODO Delete after connecting to server
 import uuid from 'uuid';
 
@@ -152,7 +152,7 @@ class ItemForm extends Component {
     }
 }
 
-class ListItem extends Component {
+class Item extends Component {
     static propTypes = {
         item: PropTypes.object.isRequired,
         onStatusIconClick: PropTypes.func.isRequired,
@@ -265,7 +265,7 @@ class EditableItem extends Component {
             );
         } else {
             return (
-                <ListItem
+                <Item
                     item={this.props.item}
                     onStatusIconClick={this.props.onStatusIconClick}
                     onEditClick={this.handleEditClick}
@@ -323,8 +323,90 @@ class ToggleableItemForm extends Component {
     }
 }
 
+class SortMenu extends Component {
+    static propTypes = {
+        activeOrder: PropTypes.number.isRequired,
+        onClick: PropTypes.func.isRequired
+    };
+
+    handleMenuItemClick = (evt) => {
+        this.props.onClick(Number.parseInt(evt.target.id, 10))
+    };
+
+    render() {
+        const menuItems = [
+            {
+                label: 'Status',
+                order: SortOrders.byStatus,
+                itemClass: "item"
+            },
+            {
+                label: 'Creation date',
+                order: SortOrders.byDate,
+                itemClass: "item"
+            },
+        ].map((item) => {
+            if(item.order === this.props.activeOrder) {
+                return Object.assign({}, item, {itemClass: "active item"})
+            } else {
+                return item;
+            }
+        });
+
+        return (
+            <div className="ui mini compact text menu">
+                <div className="header item">Sort By:</div>
+                {
+                    menuItems.map((item, idx) => (
+                        <a
+                            key={idx}
+                            id={item.order}
+                            className={item.itemClass}
+                            onClick={this.handleMenuItemClick}
+                        >
+                            {item.label}
+                        </a>
+                    ))
+                }
+            </div>
+        );
+    }
+}
+
+class EditableItemsList extends Component {
+    static propTypes = {
+        items: PropTypes.arrayOf(PropTypes.object).isRequired,
+        muList: PropTypes.arrayOf(PropTypes.string).isRequired,
+        onStatusIconClick: PropTypes.func.isRequired,
+        onFormSubmit: PropTypes.func.isRequired,
+        onTrashClick: PropTypes.func.isRequired
+    };
+
+    render() {
+        const editableItems = this.props.items.map((item, idx) => (
+            <EditableItem
+                key={idx}
+                item={item}
+                muList={this.props.muList}
+                onStatusIconClick={this.props.onStatusIconClick}
+                onTrashClick={this.props.onTrashClick}
+                onFormSubmit={this.props.onFormSubmit}
+            />
+        ));
+
+        return (
+            <div className="ui segment">
+                <div className="ui relaxed divided list">
+                    { editableItems }
+                </div>
+            </div>
+        );
+    }
+}
+
 class App extends Component {
     state = {
+        sortOrder: SortOrders.byStatus,
         mus: [
             'кг',
             'г',
@@ -417,7 +499,7 @@ class App extends Component {
                 "createDate": "2018-04-14T15:00:50",
                 "family": null
             }
-        ], 'BY_STATUS')
+        ], SortOrders.byStatus)
     };
 
     handleStatusIconClick  = (id) => {
@@ -428,7 +510,7 @@ class App extends Component {
                 return item;
             }
         });
-        this.setState(Object.assign({}, this.state, {items: sortBy(newItems, 'BY_STATUS')}));
+        this.setState(Object.assign({}, this.state, {items: sortBy(newItems, this.state.sortOrder)}));
     };
 
     handleCreateFormSubmit = (item) => {
@@ -441,6 +523,13 @@ class App extends Component {
 
     handleTrashClick = (itemId) => {
         this.deleteItem(itemId);
+    };
+
+    handleSortOrderChange = (newOrder) => {
+        this.setState({
+            sortOrder: newOrder,
+            items: sortBy([...this.state.items], newOrder)
+        });
     };
 
     createItem = (item) => {
@@ -459,7 +548,7 @@ class App extends Component {
         };
 
         this.setState({
-            items: sortBy(this.state.items.concat(newItem), 'BY_STATUS')
+            items: sortBy(this.state.items.concat(newItem), this.state.sortOrder)
         });
     };
 
@@ -487,29 +576,24 @@ class App extends Component {
     };
 
     render() {
-        const editableItems = this.state.items.map((item, idx) => (
-            <EditableItem
-                key={idx}
-                item={item}
-                muList={this.state.mus}
-                onStatusIconClick={this.handleStatusIconClick}
-                onTrashClick={this.handleTrashClick}
-                onFormSubmit={this.handleEditFormSubmit}
-            />
-        ));
-
         return (
             <div className="ui container">
+                <ToggleableItemForm
+                    muList={this.state.mus}
+                    onFormSubmit={this.handleCreateFormSubmit}
+                />
                 <div className="ui segments">
-                    <div className="ui segment">
-                        <div className="ui relaxed divided list">
-                            <ToggleableItemForm
-                                muList={ this.state.mus }
-                                onFormSubmit={ this.handleCreateFormSubmit }
-                            />
-                            { editableItems }
-                        </div>
-                    </div>
+                    <SortMenu
+                        activeOrder={this.state.sortOrder}
+                        onClick={this.handleSortOrderChange}
+                    />
+                    <EditableItemsList
+                        items={this.state.items}
+                        muList={this.state.mus}
+                        onStatusIconClick={this.handleStatusIconClick}
+                        onTrashClick={this.handleTrashClick}
+                        onFormSubmit={this.handleEditFormSubmit}
+                    />
                 </div>
             </div>
         );

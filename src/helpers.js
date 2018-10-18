@@ -1,3 +1,5 @@
+const SortOrders = Object.freeze({"byStatus":1, "byDate":2});
+
 function compareByStatus(a, b) {
     if(a.closed && !b.closed)
         return 1;
@@ -14,11 +16,11 @@ function compareByDate(a, b) {
 function sortBy(data, sortOrder) {
     let comparator;
     switch (sortOrder) {
-        case 'BY_STATUS': {
+        case SortOrders.byStatus: {
             comparator = compareByStatus;
             break;
         }
-        case 'BY_DATE': {
+        case SortOrders.byDate: {
             comparator = compareByDate;
             break;
         }
@@ -29,4 +31,4 @@ function sortBy(data, sortOrder) {
     return data.sort(comparator);
 }
 
-export {sortBy};
+export {sortBy, SortOrders};
