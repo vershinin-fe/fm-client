@@ -1,16 +1,217 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { sortBy, SortOrders } from "./helpers";
+import { createStore, combineReducers } from 'redux';
+import { Provider, connect } from 'react-redux';
 //TODO Delete after connecting to server
 import uuid from 'uuid';
+
+const reducer = combineReducers({
+    sortOrder: sortOrderReducer,
+    items: itemsReducer
+});
+
+function itemsReducer(state = [
+    {
+        "@id": 1,
+        "id": 105,
+        "name": "Молоко",
+        "quantity": 1,
+        "measurementUnit": "л",
+        "description": "Чебаркуль",
+        "price": 84,
+        "closed": false,
+        "createDate": "2018-01-14T15:00:50",
+        "family": null
+    },
+    {
+        "@id": 2,
+        "id": 106,
+        "name": "Хлеб",
+        "quantity": 1,
+        "measurementUnit": "шт",
+        "description": "Бородинский",
+        "price": 30,
+        "closed": false,
+        "createDate": "2018-01-14T15:00:50",
+        "family": null
+    },
+    {
+        "@id": 3,
+        "id": 107,
+        "name": "Кефир",
+        "quantity": 1,
+        "measurementUnit": "л",
+        "description": "Чебаркуль",
+        "price": 89,
+        "closed": false,
+        "createDate": "2018-01-14T15:00:51",
+        "family": null
+    },
+    {
+        "@id": 4,
+        "id": 108,
+        "name": "Творог",
+        "quantity": 500,
+        "measurementUnit": "г",
+        "description": "Чебаркуль",
+        "price": 125,
+        "closed": false,
+        "createDate": "2018-01-14T15:00:50",
+        "family": null
+    },
+    {
+        "@id": 5,
+        "id": 109,
+        "name": "Сыр",
+        "quantity": 300,
+        "measurementUnit": "г",
+        "description": "Артур",
+        "price": 200,
+        "closed": true,
+        "createDate": "2018-02-14T15:00:50",
+        "family": null
+    },
+    {
+        "@id": 6,
+        "id": 110,
+        "name": "Яблоки",
+        "quantity": 5,
+        "measurementUnit": "шт",
+        "description": "Сезонные",
+        "price": 80,
+        "closed": true,
+        "createDate": "2018-03-14T15:00:50",
+        "family": null
+    },
+    {
+        "@id": 7,
+        "id": 111,
+        "name": "Бананы",
+        "quantity": 10,
+        "measurementUnit": "шт",
+        "description": "",
+        "price": 60,
+        "closed": false,
+        "createDate": "2018-04-14T15:00:50",
+        "family": null
+    }
+], action) {
+    switch (action.type) {
+        case 'ADD_ITEM': {
+            const newItem = {
+                "@id": "",
+                //TODO Delete after connecting to server
+                "id": uuid.v4(),
+                "name": action.name,
+                "quantity": action.quantity,
+                "measurementUnit": action.measurementUnit,
+                "description": action.description,
+                "price": "",
+                "closed": false,
+                "createDate": "",
+                "family": null
+            };
+            return state.concat(newItem);
+        }
+        case 'UPDATE_ITEM':{
+            return state.map((item) => {
+                if(item.id === action.id) {
+                    return Object.assign({}, item, {
+                        name: action.name,
+                        description: action.description,
+                        quantity: action.quantity,
+                        measurementUnit: action.measurementUnit
+                    });
+                } else {
+                    return item;
+                }
+            });
+        }
+        case 'DELETE_ITEM': {
+            return state.filter(item => item.id !== action.id);
+        }
+        case 'SWITCH_ITEM_STATUS': {
+            return state.map((item) => {
+                if(item.id === action.id) {
+                    return Object.assign({}, item, {closed: !item.closed});
+                } else {
+                    return item;
+                }
+            });
+        }
+        default: {
+            return state;
+        }
+    }
+}
+
+function sortOrderReducer(state = SortOrders.byStatus, action) {
+    if (action.type === 'SET_SORT_ORDER') {
+        return action.sortOrder;
+    } else {
+        return state;
+    }
+}
+
+const store = createStore(reducer);
+
+function switchItemStatus(id) {
+    return {
+        type: 'SWITCH_ITEM_STATUS',
+        id: id,
+    };
+}
+
+function deleteItem(id) {
+    return {
+        type: 'DELETE_ITEM',
+        id: id,
+    };
+}
+
+function addItem(item) {
+    return {
+        type: 'ADD_ITEM',
+        name: item.name,
+        quantity: item.quantity,
+        measurementUnit: item.measurementUnit,
+        description: item.description
+    };
+}
+
+function updateItem(item) {
+    return {
+        type: 'UPDATE_ITEM',
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        measurementUnit: item.measurementUnit,
+        description: item.description
+    };
+}
+
+function updateSortOrder(sortOrder) {
+    return {
+        type: 'SET_SORT_ORDER',
+        sortOrder: sortOrder
+    }
+}
 
 class ItemForm extends Component {
     static propTypes = {
         item: PropTypes.object,
-        muList: PropTypes.arrayOf(PropTypes.string).isRequired,
         onFormSubmit: PropTypes.func.isRequired,
         onFormClose: PropTypes.func.isRequired
     };
+
+    static measurementUnits = [
+        'кг',
+        'г',
+        'л',
+        'мл',
+        'шт'
+    ];
 
     state = {
         fields: {
@@ -120,7 +321,7 @@ class ItemForm extends Component {
                             >
                                 <option key="no-mu" value=""></option>
                                 {
-                                    this.props.muList.map((mu, idx) => (
+                                    ItemForm.measurementUnits.map((mu, idx) => (
                                         <option
                                             key={idx}
                                             value={mu}
@@ -222,7 +423,6 @@ class Item extends Component {
 class EditableItem extends Component {
     static propTypes = {
         item: PropTypes.object,
-        muList: PropTypes.arrayOf(PropTypes.string).isRequired,
         onStatusIconClick: PropTypes.func.isRequired,
         onFormSubmit: PropTypes.func.isRequired,
         onTrashClick: PropTypes.func.isRequired
@@ -258,7 +458,6 @@ class EditableItem extends Component {
             return (
                 <ItemForm
                     item={this.props.item}
-                    muList={this.props.muList}
                     onFormSubmit={this.handleSubmit}
                     onFormClose={this.handleFormClose}
                 />
@@ -276,9 +475,9 @@ class EditableItem extends Component {
     }
 }
 
+// ------------------ ToggleableItemForm -------------------------------
 class ToggleableItemForm extends Component {
     static propTypes = {
-        muList: PropTypes.arrayOf(PropTypes.string).isRequired,
         onFormSubmit: PropTypes.func.isRequired,
     };
 
@@ -303,7 +502,6 @@ class ToggleableItemForm extends Component {
         if(this.state.isOpen) {
             return (
                 <ItemForm
-                    muList={this.props.muList}
                     onFormSubmit={this.handleFormSubmit}
                     onFormClose={this.handleFormClose}
                 />
@@ -323,9 +521,26 @@ class ToggleableItemForm extends Component {
     }
 }
 
+const mapStateToToggleableItemFormProps = () => ({});
+
+const mapDispatchToToggleableItemFormProps = (dispatch) => (
+    {
+        onFormSubmit: (item) => (
+            dispatch(addItem(item))
+        )
+    }
+);
+
+const ReduxToggleableItemForm = connect(
+    mapStateToToggleableItemFormProps,
+    mapDispatchToToggleableItemFormProps
+)(ToggleableItemForm);
+// ---------------------------------------------------------------------
+
+// ----------------------- SortMenu ------------------------------------
 class SortMenu extends Component {
     static propTypes = {
-        activeOrder: PropTypes.number.isRequired,
+        sortOrder: PropTypes.number.isRequired,
         onClick: PropTypes.func.isRequired
     };
 
@@ -346,7 +561,7 @@ class SortMenu extends Component {
                 itemClass: "item"
             },
         ].map((item) => {
-            if(item.order === this.props.activeOrder) {
+            if(item.order === this.props.sortOrder) {
                 return Object.assign({}, item, {itemClass: "active item"})
             } else {
                 return item;
@@ -373,21 +588,39 @@ class SortMenu extends Component {
     }
 }
 
+const mapStateToSortMenuProps = (state) => {
+    return {sortOrder: state.sortOrder};
+};
+
+const mapDispatchToSortMenuProps = (dispatch) => (
+    {
+        onClick: (sortOrder) => (
+            dispatch(updateSortOrder(sortOrder))
+        ),
+    }
+);
+
+const ReduxSortMenu = connect(
+    mapStateToSortMenuProps,
+    mapDispatchToSortMenuProps
+)(SortMenu);
+// ---------------------------------------------------------------------
+
+// ------------------- EditableItemsList -------------------------------
 class EditableItemsList extends Component {
     static propTypes = {
         items: PropTypes.arrayOf(PropTypes.object).isRequired,
-        muList: PropTypes.arrayOf(PropTypes.string).isRequired,
+        sortOrder: PropTypes.number.isRequired,
         onStatusIconClick: PropTypes.func.isRequired,
         onFormSubmit: PropTypes.func.isRequired,
         onTrashClick: PropTypes.func.isRequired
     };
 
     render() {
-        const editableItems = this.props.items.map((item, idx) => (
+        const editableItems = sortBy(this.props.items, this.props.sortOrder).map((item, idx) => (
             <EditableItem
                 key={idx}
                 item={item}
-                muList={this.props.muList}
                 onStatusIconClick={this.props.onStatusIconClick}
                 onTrashClick={this.props.onTrashClick}
                 onFormSubmit={this.props.onFormSubmit}
@@ -404,200 +637,51 @@ class EditableItemsList extends Component {
     }
 }
 
-class App extends Component {
-    state = {
-        sortOrder: SortOrders.byStatus,
-        mus: [
-            'кг',
-            'г',
-            'л',
-            'мл',
-            'шт'
-        ],
-        items: sortBy([
-            {
-                "@id": 1,
-                "id": 105,
-                "name": "Молоко",
-                "quantity": 1,
-                "measurementUnit": "л",
-                "description": "Чебаркуль",
-                "price": 84,
-                "closed": false,
-                "createDate": "2018-01-14T15:00:50",
-                "family": null
-            },
-            {
-                "@id": 2,
-                "id": 106,
-                "name": "Хлеб",
-                "quantity": 1,
-                "measurementUnit": "шт",
-                "description": "Бородинский",
-                "price": 30,
-                "closed": false,
-                "createDate": "2018-01-14T15:00:50",
-                "family": null
-            },
-            {
-                "@id": 3,
-                "id": 107,
-                "name": "Кефир",
-                "quantity": 1,
-                "measurementUnit": "л",
-                "description": "Чебаркуль",
-                "price": 89,
-                "closed": false,
-                "createDate": "2018-01-14T15:00:50",
-                "family": null
-            },
-            {
-                "@id": 4,
-                "id": 108,
-                "name": "Творог",
-                "quantity": 500,
-                "measurementUnit": "г",
-                "description": "Чебаркуль",
-                "price": 125,
-                "closed": false,
-                "createDate": "2018-01-14T15:00:50",
-                "family": null
-            },
-            {
-                "@id": 5,
-                "id": 109,
-                "name": "Сыр",
-                "quantity": 300,
-                "measurementUnit": "г",
-                "description": "Артур",
-                "price": 200,
-                "closed": true,
-                "createDate": "2018-02-14T15:00:50",
-                "family": null
-            },
-            {
-                "@id": 6,
-                "id": 110,
-                "name": "Яблоки",
-                "quantity": 5,
-                "measurementUnit": "шт",
-                "description": "Сезонные",
-                "price": 80,
-                "closed": true,
-                "createDate": "2018-03-14T15:00:50",
-                "family": null
-            },
-            {
-                "@id": 7,
-                "id": 111,
-                "name": "Бананы",
-                "quantity": 10,
-                "measurementUnit": "шт",
-                "description": "",
-                "price": 60,
-                "closed": false,
-                "createDate": "2018-04-14T15:00:50",
-                "family": null
-            }
-        ], SortOrders.byStatus)
+const mapStateToEditableItemsListProps = (state) => {
+    return {
+        items: state.items,
+        sortOrder: state.sortOrder
     };
+};
 
-    handleStatusIconClick  = (id) => {
-        const newItems = this.state.items.map((item) => {
-            if(item.id === id) {
-                return Object.assign({}, item, {closed: !item.closed});
-            } else {
-                return item;
-            }
-        });
-        this.setState(Object.assign({}, this.state, {items: sortBy(newItems, this.state.sortOrder)}));
-    };
+const mapDispatchToEditableItemsListProps = (dispatch) => (
+    {
+        onStatusIconClick: (id) => (
+            dispatch(switchItemStatus(id))
+        ),
+        onFormSubmit: (item) => (
+            dispatch(updateItem(item))
+        ),
+        onTrashClick: (id) => (
+            dispatch(deleteItem(id))
+        )
+    }
+);
 
-    handleCreateFormSubmit = (item) => {
-        this.createItem(item);
-    };
+const ReduxEditableItemsList = connect(
+    mapStateToEditableItemsListProps,
+    mapDispatchToEditableItemsListProps
+)(EditableItemsList);
+// ---------------------------------------------------------------------
 
-    handleEditFormSubmit = (item) => {
-        this.updateItem(item);
-    };
-
-    handleTrashClick = (itemId) => {
-        this.deleteItem(itemId);
-    };
-
-    handleSortOrderChange = (newOrder) => {
-        this.setState({
-            sortOrder: newOrder,
-            items: sortBy([...this.state.items], newOrder)
-        });
-    };
-
-    createItem = (item) => {
-        const newItem = {
-            "@id": "",
-            //TODO Delete after connecting to server
-            "id": uuid.v4(),
-            "name": item.name,
-            "quantity": item.quantity,
-            "measurementUnit": item.measurementUnit,
-            "description": item.description,
-            "price": "",
-            "closed": false,
-            "createDate": "",
-            "family": null
-        };
-
-        this.setState({
-            items: sortBy(this.state.items.concat(newItem), this.state.sortOrder)
-        });
-    };
-
-    updateItem = (attrs) => {
-        this.setState({
-            items: this.state.items.map((item) => {
-                if(item.id === attrs.id) {
-                    return Object.assign({}, item, {
-                        name: attrs.name,
-                        description: attrs.description,
-                        quantity: attrs.quantity,
-                        measurementUnit: attrs.measurementUnit
-                    });
-                } else {
-                    return item;
-                }
-            })
-        });
-    };
-
-    deleteItem = (itemId) => {
-        this.setState({
-            items: this.state.items.filter(item => item.id !== itemId)
-        });
-    };
-
+class ItemsListView extends Component {
     render() {
         return (
             <div className="ui container">
-                <ToggleableItemForm
-                    muList={this.state.mus}
-                    onFormSubmit={this.handleCreateFormSubmit}
-                />
+                <ReduxToggleableItemForm/>
                 <div className="ui segments">
-                    <SortMenu
-                        activeOrder={this.state.sortOrder}
-                        onClick={this.handleSortOrderChange}
-                    />
-                    <EditableItemsList
-                        items={this.state.items}
-                        muList={this.state.mus}
-                        onStatusIconClick={this.handleStatusIconClick}
-                        onTrashClick={this.handleTrashClick}
-                        onFormSubmit={this.handleEditFormSubmit}
-                    />
+                    <ReduxSortMenu/>
+                    <ReduxEditableItemsList/>
                 </div>
             </div>
         );
     }
 }
 
-export default App;
+const WrappedApp = () => (
+    <Provider store={store}>
+        <ItemsListView />
+    </Provider>
+);
+
+export default WrappedApp;
