@@ -1,202 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { sortBy, SortOrders } from "./helpers";
-import { createStore, combineReducers } from 'redux';
+import { sortBy, SortOrders } from "./helpers/sort";
 import { Provider, connect } from 'react-redux';
-//TODO Delete after connecting to server
-import uuid from 'uuid';
+import configureStore from "./store/configureStore";
+import { switchItemStatus, deleteItem, addItem, updateItem, updateSortOrder } from './actions'
 
-const reducer = combineReducers({
-    sortOrder: sortOrderReducer,
-    items: itemsReducer
-});
-
-function itemsReducer(state = [
-    {
-        "@id": 1,
-        "id": 105,
-        "name": "Молоко",
-        "quantity": 1,
-        "measurementUnit": "л",
-        "description": "Чебаркуль",
-        "price": 84,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 2,
-        "id": 106,
-        "name": "Хлеб",
-        "quantity": 1,
-        "measurementUnit": "шт",
-        "description": "Бородинский",
-        "price": 30,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 3,
-        "id": 107,
-        "name": "Кефир",
-        "quantity": 1,
-        "measurementUnit": "л",
-        "description": "Чебаркуль",
-        "price": 89,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:51",
-        "family": null
-    },
-    {
-        "@id": 4,
-        "id": 108,
-        "name": "Творог",
-        "quantity": 500,
-        "measurementUnit": "г",
-        "description": "Чебаркуль",
-        "price": 125,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 5,
-        "id": 109,
-        "name": "Сыр",
-        "quantity": 300,
-        "measurementUnit": "г",
-        "description": "Артур",
-        "price": 200,
-        "closed": true,
-        "createDate": "2018-02-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 6,
-        "id": 110,
-        "name": "Яблоки",
-        "quantity": 5,
-        "measurementUnit": "шт",
-        "description": "Сезонные",
-        "price": 80,
-        "closed": true,
-        "createDate": "2018-03-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 7,
-        "id": 111,
-        "name": "Бананы",
-        "quantity": 10,
-        "measurementUnit": "шт",
-        "description": "",
-        "price": 60,
-        "closed": false,
-        "createDate": "2018-04-14T15:00:50",
-        "family": null
-    }
-], action) {
-    switch (action.type) {
-        case 'ADD_ITEM': {
-            const newItem = {
-                "@id": "",
-                //TODO Delete after connecting to server
-                "id": uuid.v4(),
-                "name": action.name,
-                "quantity": action.quantity,
-                "measurementUnit": action.measurementUnit,
-                "description": action.description,
-                "price": "",
-                "closed": false,
-                "createDate": "",
-                "family": null
-            };
-            return state.concat(newItem);
-        }
-        case 'UPDATE_ITEM':{
-            return state.map((item) => {
-                if(item.id === action.id) {
-                    return Object.assign({}, item, {
-                        name: action.name,
-                        description: action.description,
-                        quantity: action.quantity,
-                        measurementUnit: action.measurementUnit
-                    });
-                } else {
-                    return item;
-                }
-            });
-        }
-        case 'DELETE_ITEM': {
-            return state.filter(item => item.id !== action.id);
-        }
-        case 'SWITCH_ITEM_STATUS': {
-            return state.map((item) => {
-                if(item.id === action.id) {
-                    return Object.assign({}, item, {closed: !item.closed});
-                } else {
-                    return item;
-                }
-            });
-        }
-        default: {
-            return state;
-        }
-    }
-}
-
-function sortOrderReducer(state = SortOrders.byStatus, action) {
-    if (action.type === 'SET_SORT_ORDER') {
-        return action.sortOrder;
-    } else {
-        return state;
-    }
-}
-
-const store = createStore(reducer);
-
-function switchItemStatus(id) {
-    return {
-        type: 'SWITCH_ITEM_STATUS',
-        id: id,
-    };
-}
-
-function deleteItem(id) {
-    return {
-        type: 'DELETE_ITEM',
-        id: id,
-    };
-}
-
-function addItem(item) {
-    return {
-        type: 'ADD_ITEM',
-        name: item.name,
-        quantity: item.quantity,
-        measurementUnit: item.measurementUnit,
-        description: item.description
-    };
-}
-
-function updateItem(item) {
-    return {
-        type: 'UPDATE_ITEM',
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        measurementUnit: item.measurementUnit,
-        description: item.description
-    };
-}
-
-function updateSortOrder(sortOrder) {
-    return {
-        type: 'SET_SORT_ORDER',
-        sortOrder: sortOrder
-    }
-}
+const store = configureStore();
 
 class ItemForm extends Component {
     static propTypes = {
@@ -523,17 +332,9 @@ class ToggleableItemForm extends Component {
 
 const mapStateToToggleableItemFormProps = () => ({});
 
-const mapDispatchToToggleableItemFormProps = (dispatch) => (
-    {
-        onFormSubmit: (item) => (
-            dispatch(addItem(item))
-        )
-    }
-);
-
 const ReduxToggleableItemForm = connect(
     mapStateToToggleableItemFormProps,
-    mapDispatchToToggleableItemFormProps
+    { onFormSubmit: addItem }
 )(ToggleableItemForm);
 // ---------------------------------------------------------------------
 
@@ -592,17 +393,9 @@ const mapStateToSortMenuProps = (state) => {
     return {sortOrder: state.sortOrder};
 };
 
-const mapDispatchToSortMenuProps = (dispatch) => (
-    {
-        onClick: (sortOrder) => (
-            dispatch(updateSortOrder(sortOrder))
-        ),
-    }
-);
-
 const ReduxSortMenu = connect(
     mapStateToSortMenuProps,
-    mapDispatchToSortMenuProps
+    { onClick: updateSortOrder }
 )(SortMenu);
 // ---------------------------------------------------------------------
 
@@ -644,23 +437,13 @@ const mapStateToEditableItemsListProps = (state) => {
     };
 };
 
-const mapDispatchToEditableItemsListProps = (dispatch) => (
-    {
-        onStatusIconClick: (id) => (
-            dispatch(switchItemStatus(id))
-        ),
-        onFormSubmit: (item) => (
-            dispatch(updateItem(item))
-        ),
-        onTrashClick: (id) => (
-            dispatch(deleteItem(id))
-        )
-    }
-);
-
 const ReduxEditableItemsList = connect(
     mapStateToEditableItemsListProps,
-    mapDispatchToEditableItemsListProps
+    {
+        onStatusIconClick: switchItemStatus,
+        onFormSubmit: updateItem,
+        onTrashClick: deleteItem
+    }
 )(EditableItemsList);
 // ---------------------------------------------------------------------
 
