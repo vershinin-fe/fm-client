@@ -9,7 +9,9 @@
     "semantic-ui": "^2.4.0",
     "prop-types": "^15.6.1",
     "react-redux": "^5.0.7",
-    "redux": "^4.0.1"
+    "redux": "^4.0.1",
+    "cross-fetch": "^2.2.2",
+    "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
     "uuid": "^3.2.1"
