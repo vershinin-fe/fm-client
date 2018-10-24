@@ -1,7 +1,7 @@
 export const SWITCH_ITEM_STATUS = 'SWITCH_ITEM_STATUS';
 
 const sendSwitchItemStatus = (id) => ({
-    type: 'SWITCH_ITEM_STATUS',
+    type: SWITCH_ITEM_STATUS,
     id: id
 });
 
@@ -13,7 +13,7 @@ export const switchItemStatus = (id) => (dispatch) => {
 export const DELETE_ITEM = 'DELETE_ITEM';
 
 const sendDeleteItem = (id) => ({
-        type: 'DELETE_ITEM',
+        type: DELETE_ITEM,
         id: id,
 });
 
@@ -25,7 +25,7 @@ export const deleteItem = (id) => (dispatch) => {
 export const ADD_ITEM = 'ADD_ITEM';
 
 const sendAddItem = (item) => ({
-        type: 'ADD_ITEM',
+        type: ADD_ITEM,
         name: item.name,
         quantity: item.quantity,
         measurementUnit: item.measurementUnit,
@@ -40,7 +40,7 @@ export const addItem = (item) => (dispatch) => {
 export const UPDATE_ITEM = 'UPDATE_ITEM';
 
 const sendUpdateItem = (item) => ({
-        type: 'UPDATE_ITEM',
+        type: UPDATE_ITEM,
         id: item.id,
         name: item.name,
         quantity: item.quantity,
@@ -56,7 +56,7 @@ export const updateItem = (item) => (dispatch) => {
 export const SET_SORT_ORDER = 'SET_SORT_ORDER';
 
 const sendUpdateSortOrder = (sortOrder) => ({
-        type: 'SET_SORT_ORDER',
+        type: SET_SORT_ORDER,
         sortOrder: sortOrder
 });
 
