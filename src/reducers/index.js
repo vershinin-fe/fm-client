@@ -90,6 +90,9 @@ const items = (state = [
     }
 ], action) => {
     switch (action.type) {
+        case ActionTypes.GET_ITEMS: {
+            return [...action.items];
+        }
         case ActionTypes.ADD_ITEM: {
             const newItem = {
                 "@id": "",
