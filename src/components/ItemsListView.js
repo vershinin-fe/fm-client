@@ -6,7 +6,7 @@ import SortMenu from "./SortMenu";
 export default class ItemsListView extends Component {
     render() {
         return (
-            <div className="ui container">
+            <div>
                 <ToggleableItemForm/>
                 <div className="ui segments">
                     <SortMenu/>
