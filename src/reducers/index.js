@@ -3,95 +3,49 @@ import { combineReducers } from 'redux';
 import { SortOrders } from "../helpers/sort";
 import uuid from "uuid";
 
-const items = (state = [
-    {
-        "@id": 1,
-        "id": 105,
-        "name": "Молоко",
-        "quantity": 1,
-        "measurementUnit": "л",
-        "description": "Чебаркуль",
-        "price": 84,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 2,
-        "id": 106,
-        "name": "Хлеб",
-        "quantity": 1,
-        "measurementUnit": "шт",
-        "description": "Бородинский",
-        "price": 30,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 3,
-        "id": 107,
-        "name": "Кефир",
-        "quantity": 1,
-        "measurementUnit": "л",
-        "description": "Чебаркуль",
-        "price": 89,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:51",
-        "family": null
-    },
-    {
-        "@id": 4,
-        "id": 108,
-        "name": "Творог",
-        "quantity": 500,
-        "measurementUnit": "г",
-        "description": "Чебаркуль",
-        "price": 125,
-        "closed": false,
-        "createDate": "2018-01-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 5,
-        "id": 109,
-        "name": "Сыр",
-        "quantity": 300,
-        "measurementUnit": "г",
-        "description": "Артур",
-        "price": 200,
-        "closed": true,
-        "createDate": "2018-02-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 6,
-        "id": 110,
-        "name": "Яблоки",
-        "quantity": 5,
-        "measurementUnit": "шт",
-        "description": "Сезонные",
-        "price": 80,
-        "closed": true,
-        "createDate": "2018-03-14T15:00:50",
-        "family": null
-    },
-    {
-        "@id": 7,
-        "id": 111,
-        "name": "Бананы",
-        "quantity": 10,
-        "measurementUnit": "шт",
-        "description": "",
-        "price": 60,
-        "closed": false,
-        "createDate": "2018-04-14T15:00:50",
-        "family": null
-    }
-], action) => {
+const itemsList = (state = {
+    formOpenedItemId: undefined,
+    items: [
+        {
+            "@id": 4,
+            "id": 108,
+            "name": "Творог",
+            "quantity": 500,
+            "measurementUnit": "г",
+            "description": "Чебаркуль",
+            "price": 125,
+            "closed": false,
+            "createDate": "2018-01-14T15:00:50",
+            "family": null
+        },
+        {
+            "@id": 5,
+            "id": 109,
+            "name": "Сыр",
+            "quantity": 300,
+            "measurementUnit": "г",
+            "description": "Артур",
+            "price": 200,
+            "closed": true,
+            "createDate": "2018-02-14T15:00:50",
+            "family": null
+        },
+        {
+            "@id": 6,
+            "id": 110,
+            "name": "Яблоки",
+            "quantity": 5,
+            "measurementUnit": "шт",
+            "description": "Сезонные",
+            "price": 80,
+            "closed": true,
+            "createDate": "2018-03-14T15:00:50",
+            "family": null
+        }]
+}, action) => {
     switch (action.type) {
         case ActionTypes.GET_ITEMS: {
-            return [...action.items];
+            return { ...state, items: [...action.items] };
         }
         case ActionTypes.ADD_ITEM: {
             const newItem = {
@@ -104,13 +58,13 @@ const items = (state = [
                 "description": action.description,
                 "price": "",
                 "closed": false,
-                "createDate": "",
+                "createDate": (new Date()).toISOString(),
                 "family": null
             };
-            return state.concat(newItem);
+            return { ...state, items: state.items.concat(newItem) };
         }
         case ActionTypes.UPDATE_ITEM:{
-            return state.map((item) => {
+            const newItems = state.items.map((item) => {
                 if(item.id === action.id) {
                     return Object.assign({}, item, {
                         name: action.name,
@@ -122,18 +76,20 @@ const items = (state = [
                     return item;
                 }
             });
+            return { ...state, items: newItems };
         }
         case ActionTypes.DELETE_ITEM: {
-            return state.filter(item => item.id !== action.id);
+            return { ...state, items: state.items.filter(item => item.id !== action.id) };
         }
         case ActionTypes.SWITCH_ITEM_STATUS: {
-            return state.map((item) => {
+            const newItems = state.items.map((item) => {
                 if(item.id === action.id) {
                     return Object.assign({}, item, {closed: !item.closed});
                 } else {
                     return item;
                 }
             });
+            return { ...state, items: newItems };
         }
         default: {
             return state;
@@ -151,7 +107,7 @@ const sortOrder = (state = SortOrders.byStatus, action) => {
 
 const rootReducer = combineReducers({
     sortOrder,
-    items
+    itemsList
 });
 
 export default rootReducer;
