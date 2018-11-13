@@ -55,39 +55,7 @@ export const updateItem = (item) => (dispatch) => {
 
 export const SET_SORT_ORDER = 'SET_SORT_ORDER';
 
-const sendUpdateSortOrder = (sortOrder) => ({
+export const updateSortOrder = (sortOrder) => ({
         type: SET_SORT_ORDER,
         sortOrder: sortOrder
 });
-
-export const updateSortOrder = (sortOrder) => (dispatch) => {
-    return dispatch(sendUpdateSortOrder(sortOrder));
-};
-
-/*
-import fetch from 'cross-fetch';
-
-export const REQUEST_ITEMS = 'REQUEST_ITEMS';
-export const requestItems = () => {
-    return {
-        type: REQUEST_ITEMS
-    }
-};
-
-export const RECEIVE_ITEMS = 'RECEIVE_ITEMS';
-export const receiveItems = (json) => {
-    return {
-        type: RECEIVE_ITEMS,
-        items: json
-    }
-};
-
-export const fetchItems = (dispatch) => {
-    dispatch(requestItems);
-    let request = { method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default' };
-    return fetch(`https://localhost:8080/foodmanager/`)
-};
- */
