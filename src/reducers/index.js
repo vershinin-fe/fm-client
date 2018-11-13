@@ -3,6 +3,17 @@ import { combineReducers } from 'redux';
 import { SortOrders } from "../helpers/sort";
 import uuid from "uuid";
 
+const addItemFormOpened = (state = false, action) => {
+    switch (action.type) {
+        case ActionTypes.TOGGLE_ADD_ITEM_FORM: {
+            return action.isOpened;
+        }
+        default: {
+            return state;
+        }
+    }
+};
+
 const itemsList = (state = {
     formOpenedItemId: undefined,
     items: [
@@ -107,7 +118,8 @@ const sortOrder = (state = SortOrders.byStatus, action) => {
 
 const rootReducer = combineReducers({
     sortOrder,
-    itemsList
+    itemsList,
+    addItemFormOpened
 });
 
 export default rootReducer;

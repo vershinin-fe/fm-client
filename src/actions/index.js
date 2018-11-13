@@ -59,3 +59,11 @@ export const updateSortOrder = (sortOrder) => ({
         type: SET_SORT_ORDER,
         sortOrder: sortOrder
 });
+
+
+export const TOGGLE_ADD_ITEM_FORM = 'TOGGLE_ADD_ITEM_FORM';
+
+export const toggleAddItemForm = (isOpened) => ({
+    type: TOGGLE_ADD_ITEM_FORM,
+    isOpened: isOpened
+});

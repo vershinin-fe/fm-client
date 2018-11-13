@@ -1,33 +1,31 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
-import {addItem} from "../actions";
+import {addItem, toggleAddItemForm} from "../actions";
 import ItemForm from "./ItemForm";
 
 class ToggleableItemForm extends Component {
     static propTypes = {
-        onFormSubmit: PropTypes.func.isRequired,
-    };
-
-    state = {
-        isOpen: false
+        isOpened: PropTypes.bool,
+        toggleForm: PropTypes.func,
+        onFormSubmit: PropTypes.func.isRequired
     };
 
     handleFormOpen = () => {
-        this.setState({ isOpen: true });
+        this.props.toggleForm(true);
     };
 
     handleFormClose = () => {
-        this.setState({ isOpen: false });
+        this.props.toggleForm(false);
     };
 
     handleFormSubmit = (item) => {
         this.props.onFormSubmit(item);
-        this.setState({ isOpen: false })
+        this.handleFormClose();
     };
 
     render() {
-        if(this.state.isOpen) {
+        if(this.props.isOpened) {
             return (
                 <ItemForm
                     onFormSubmit={this.handleFormSubmit}
@@ -49,9 +47,12 @@ class ToggleableItemForm extends Component {
     }
 }
 
-const mapStateToProps = () => ({});
+const mapStateToProps = (state) => ({ isOpened: state.addItemFormOpened });
 
 export default connect(
     mapStateToProps,
-    { onFormSubmit: addItem }
+    {
+        onFormSubmit: addItem,
+        toggleForm: toggleAddItemForm
+    }
 )(ToggleableItemForm);
