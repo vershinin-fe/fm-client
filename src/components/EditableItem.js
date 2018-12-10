@@ -5,14 +5,12 @@ import Item from "./Item";
 
 export default class EditableItem extends Component {
     static propTypes = {
+        editFormIsOpened: PropTypes.bool.isRequired,
         item: PropTypes.object,
+        openEditFormById: PropTypes.func.isRequired,
         onStatusIconClick: PropTypes.func.isRequired,
         onFormSubmit: PropTypes.func.isRequired,
         onTrashClick: PropTypes.func.isRequired
-    };
-
-    state = {
-        editFormOpen: false
     };
 
     handleEditClick = () => {
@@ -29,15 +27,15 @@ export default class EditableItem extends Component {
     };
 
     closeForm = () => {
-        this.setState({editFormOpen: false});
+        this.props.openEditFormById(undefined);
     };
 
     openForm = () => {
-        this.setState({editFormOpen: true});
+        this.props.openEditFormById(this.props.item.id);
     };
 
     render() {
-        if(this.state.editFormOpen) {
+        if(this.props.editFormIsOpened) {
             return (
                 <ItemForm
                     item={this.props.item}

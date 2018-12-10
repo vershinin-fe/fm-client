@@ -102,6 +102,9 @@ const itemsList = (state = {
             });
             return { ...state, items: newItems };
         }
+        case ActionTypes.OPEN_EDIT_FORM_BY_ID: {
+            return { ...state, formOpenedItemId: action.itemId };
+        }
         default: {
             return state;
         }
